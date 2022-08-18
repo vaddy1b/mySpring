@@ -1,11 +1,13 @@
 package com.example.policeregisterservise.controller;
 
-import com.example.policeregisterservise.dto.InsuranceDto;
+import com.example.policeregisterservise.dto.RegistrationAutoDto;
+import com.example.policeregisterservise.servise.InsuranceServise;
 import com.example.policeregisterservise.servise.PoliceRegistrationFeignServise;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class InsuranceController {
@@ -13,27 +15,26 @@ public class InsuranceController {
     @Autowired
     private PoliceRegistrationFeignServise policeRegistrationFeignServise;
 
+    @Autowired
+    private InsuranceServise insuranceServise;
+
+
     @GetMapping("/hi")
     private String hi() {
         return "It works";
     }
 
-    @GetMapping("/incurance")
-    public String show(@RequestParam String vin) {
+    @GetMapping("/registrationauto")
+    public String show(@RequestBody RegistrationAutoDto registrationAutoDto) {
 
-        LocalDate date = LocalDate.now();
-        InsuranceDto show = policeRegistrationFeignServise.show(vin);
-        LocalDate insuranceDate = show.getEndDate();
-
-        String s;
-        if (insuranceDate.isAfter(date)) {
-            s = "Машина зарегистрирована";
-        } else {
-            s = "В регистрации отказано";
+        Boolean result = insuranceServise.liquidInsurance(policeRegistrationFeignServise
+                .show(registrationAutoDto.getVin()));
+        if (result == false) {
+            return "В регистрации отказано";
         }
 
-        return s;
-
+        registrationAutoDto.getAutoNumb();
+        return null;
     }
 
 }
